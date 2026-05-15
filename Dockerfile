@@ -20,7 +20,5 @@ EXPOSE 7860
 
 
 
-USER user
-
 # 注意：这里用 supervisor 作为主进程，而不是直接运行 cli-proxy-api
 CMD ["supervisord", "-n"]
