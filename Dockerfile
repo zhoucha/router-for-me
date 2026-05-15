@@ -7,6 +7,10 @@ RUN apt-get update && apt-get install -y redis-server supervisor && rm -rf /var/
 
 RUN useradd -m -u 1000 user
 
+# 关键：设置工作目录
+WORKDIR /app
+
+
 COPY --chown=user:user requirements.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
