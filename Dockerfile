@@ -1,16 +1,27 @@
-# Read the doc: https://huggingface.co/docs/hub/spaces-sdks-docker
-# you will also find guides on how best to write your Dockerfile
+FROM python:3.9-slim
 
-FROM python:3.9
+ENV PYTHONUNBUFFERED=1
+
+# 安装 redis-server 和 supervisor
+RUN apt-get update && apt-get install -y redis-server supervisor && rm -rf /var/lib/apt/lists/*
 
 RUN useradd -m -u 1000 user
+
+COPY --chown=user:user requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY --chown=user:user cli-proxy-api config.yaml ./
+RUN chmod +x cli-proxy-api
+
+# 复制 supervisor 配置文件（内容见后文）
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+EXPOSE 7860
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl --fail http://localhost:7860/health || exit 1
+
 USER user
-ENV PATH="/home/user/.local/bin:$PATH"
 
-WORKDIR /app
-
-COPY --chown=user ./requirements.txt requirements.txt
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
-
-COPY --chown=user . /app
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
+# 注意：这里用 supervisor 作为主进程，而不是直接运行 cli-proxy-api
+CMD ["supervisord", "-n"]
