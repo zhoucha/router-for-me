@@ -12,7 +12,7 @@ RUN useradd -m -u 1000 user
 WORKDIR /app
 
 
-COPY --chown=user:user cli-proxy-api config.yaml ./
+COPY --chown=user:user  config.yaml ./
 
 # 关键：从你的 GitHub Release 下载 cli-proxy-api 二进制文件
 RUN wget -O /app/cli-proxy-api https://github.com/zhoucha/router-for-me/releases/latest/download/cli-proxy-api && \
