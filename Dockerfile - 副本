@@ -11,11 +11,11 @@ RUN useradd -m -u 1000 user
 WORKDIR /app
 
 
+COPY --chown=user:user requirements.txt requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# 关键：从你的 GitHub Release 下载 cli-proxy-api 二进制文件
-RUN wget -O /app/cli-proxy-api https://github.com/zhoucha/router-for-me/releases/latest/download/cli-proxy-api && \
-    chmod +x /app/cli-proxy-api
-
+COPY --chown=user:user cli-proxy-api config.yaml ./
+RUN chmod +x cli-proxy-api
 
 # 复制 supervisor 配置文件（内容见后文）
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
